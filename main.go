@@ -59,7 +59,6 @@ func main() {
 
 	default:
 		printHelp()
-		os.Exit(1)
 	}
 }
 
@@ -77,6 +76,14 @@ func decompressFile(fileType string, filename string, destination string) {
 
 func printHelp() {
 	fmt.Println(`
-        Kive
+         _  ___  _   _  ___
+        | |/ / || \ / || __|
+        |   <| | \ V / | _|
+        |_|\_\_|  \_/  |___|
+
+        /kē'vā/
+        Command line automatic multi-format compression/decompression & archiving/unarchiving utility.
     `)
+
+	flag.PrintDefaults()
 }
