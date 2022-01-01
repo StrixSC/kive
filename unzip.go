@@ -60,6 +60,7 @@ func unzip(filename string) (bool, error) {
 			return false, err
 		}
 
+		fmt.Printf("File unzipped successfully. Location: %s/\n", outputFile)
 		outputDst.Close()
 		archFile.Close()
 	}
