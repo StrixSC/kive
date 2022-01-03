@@ -4,16 +4,29 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
+	"os/exec"
+
+	"github.com/h2non/filetype"
 )
 
 const (
-	filetypeZip  = "zip"
-	filetypeGZip = "gzip"
-	filetypeTar  = "tar"
-	filetypeBZip = "bzip2"
+	unhandledFiletype = "UnhandledFiletype"
 )
+
+type FileHandlerCommands struct {
+	name     string
+	commands []string
+}
+
+type FileHandler map[string]FileHandlerCommands
+
+var KiveFileHandler = FileHandler{
+	"zip":   FileHandlerCommands{name: "unzip", commands: []string{}},
+	"x-tar": FileHandlerCommands{name: "tar", commands: []string{"xvf"}},
+}
 
 func main() {
 	decompressCmd := flag.NewFlagSet("decompress", flag.ExitOnError)
@@ -38,14 +51,14 @@ func main() {
 
 	case "decompress":
 		decompressCmd.Parse(os.Args[2:])
-		_, err := handleDecompression(*decompressInput, *decompressOutput, *decompressMethod)
+		err := handleDecompression(*decompressInput, *decompressOutput, *decompressMethod)
 		if err != nil {
 			log.Fatal(err)
 		}
 
 	case "compress":
 		compressCmd.Parse(os.Args[2:])
-		_, err := handleCompression(*compressInput, *compressOutput, *compressMethod)
+		err := handleCompression(*compressInput, *compressOutput, *compressMethod)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -54,9 +67,9 @@ func main() {
 		autoCmd.Parse(os.Args[2:])
 		err := checkFileExists(*autoInput)
 		if err != nil {
-			log.Fatal(errors.New("Provided file does not exist or cannot be found."))
+			log.Fatal(err)
 		}
-		_, err = handleAutomatic(*autoInput)
+		err = handleAutomatic(*autoInput)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -71,16 +84,43 @@ func checkFileExists(filename string) error {
 	return err
 }
 
-func decompressFile(fileType string, filename string, destination string) {
-	switch fileType {
-	case "zip":
-		_, err := unzip(filename)
+func handleCompression(input string, output string, method string) error {
+	return nil
+}
+
+func handleDecompression(input string, output string, method string) error {
+	return nil
+}
+
+func handleAutomatic(filename string) error {
+	buf, _ := ioutil.ReadFile(filename)
+	if filetype.IsArchive(buf) {
+		fType, err := filetype.Match(buf)
 		if err != nil {
-			log.Fatal(err)
-			os.Exit(1)
+		} else {
+			t := fType.MIME.Subtype
+			fmt.Printf("Detected %s file. Working...\n", t)
+			if kiveHandler, exists := KiveFileHandler[t]; !exists {
+				return errors.New(unhandledFiletype)
+			} else {
+				return handle(filename, kiveHandler)
+			}
 		}
-		break
+	} else {
+		return errors.New(unhandledFiletype)
 	}
+	return nil
+}
+
+func handle(filename string, handler FileHandlerCommands) error {
+	commands := append(handler.commands, filename)
+	output, err := exec.Command(handler.name, commands...).Output()
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(string(output[:]))
+	return nil
 }
 
 func printHelp() {
