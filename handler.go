@@ -3,8 +3,9 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/h2non/filetype"
 	"io/ioutil"
+
+	"github.com/h2non/filetype"
 )
 
 func handleCompression(input string, output string, method string) (bool, error) {

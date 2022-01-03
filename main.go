@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"log"
@@ -28,7 +29,7 @@ func main() {
 	autoCmd := flag.NewFlagSet("auto", flag.ExitOnError)
 	autoInput := autoCmd.String("input", "", "Input file")
 
-	if len(os.Args) < 2 {
+	if len(os.Args) <= 2 {
 		printHelp()
 		return
 	}
@@ -51,8 +52,11 @@ func main() {
 
 	case "auto":
 		autoCmd.Parse(os.Args[2:])
-		fmt.Println("File: ", *autoInput)
-		_, err := handleAutomatic(*autoInput)
+		err := checkFileExists(*autoInput)
+		if err != nil {
+			log.Fatal(errors.New("Provided file does not exist or cannot be found."))
+		}
+		_, err = handleAutomatic(*autoInput)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -60,6 +64,11 @@ func main() {
 	default:
 		printHelp()
 	}
+}
+
+func checkFileExists(filename string) error {
+	_, err := os.Stat(filename)
+	return err
 }
 
 func decompressFile(fileType string, filename string, destination string) {
