@@ -1,4 +1,4 @@
-module strixsc/kive
+module github.com/strixsc/kive
 
 go 1.17
 
