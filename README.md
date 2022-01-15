@@ -2,10 +2,6 @@
   <img width="50%" src="https://i.ibb.co/6n3prXh/image.png" />
 </p>
 
-## Update
-
-Kive was designed as a tool for a larger suite of tools to increase user productivity. However, due to the sheer efficency of [Dtrx](https://github.com/brettcs/dtrx), there will no longer be expected updates to this project.
-
 ## Kive
 
 Command line automatic multi-format compression/decompression & archiving/unarchiving utility.
